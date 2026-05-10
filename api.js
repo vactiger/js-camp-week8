@@ -5,6 +5,11 @@
 const axios = require('axios');
 const { API_PATH, BASE_URL, ADMIN_TOKEN } = require('./config');
 
+// 客戶端共用 URL 前綴
+const customerUrl = `${BASE_URL}/api/livejs/v1/customer/${API_PATH}`;
+// 管理員共用 URL 前綴
+const adminUrl = `${BASE_URL}/api/livejs/v1/admin/${API_PATH}`;
+
 // ========== 客戶端 API ==========
 
 /**
@@ -14,6 +19,13 @@ const { API_PATH, BASE_URL, ADMIN_TOKEN } = require('./config');
 async function fetchProducts() {
   // 請實作此函式
   // 回傳 response.data.products
+  try {
+    const response = await axios.get(`${customerUrl}/products`);
+    return response.data.products;
+  } catch (error) {
+    console.error('取得產品列表失敗:', error.message);
+    throw error;
+  }
 }
 
 /**
@@ -22,6 +34,17 @@ async function fetchProducts() {
  */
 async function fetchCart() {
   // 請實作此函式
+  try {
+    const response = await axios.get(`${customerUrl}/carts`);
+    return {
+      carts: response.data.carts,
+      total: response.data.total,
+      finalTotal: response.data.finalTotal
+    };
+  } catch (error) {
+    console.error('取得購物車失敗:', error.message);
+    throw error;
+  }
 }
 
 /**
@@ -32,6 +55,15 @@ async function fetchCart() {
  */
 async function addToCart(productId, quantity) {
   // 請實作此函式
+  try {
+    const response = await axios.post(`${customerUrl}/carts`, {
+      data: { productId, quantity }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('加入購物車失敗:', error.message);
+    throw error;
+  }
 }
 
 /**
@@ -42,6 +74,15 @@ async function addToCart(productId, quantity) {
  */
 async function updateCartItem(cartId, quantity) {
   // 請實作此函式
+  try {
+    const response = await axios.patch(`${customerUrl}/carts`, {
+      data: { id: cartId, quantity }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('更新購物車失敗:', error.message);
+    throw error;
+  }
 }
 
 /**
@@ -51,6 +92,13 @@ async function updateCartItem(cartId, quantity) {
  */
 async function deleteCartItem(cartId) {
   // 請實作此函式
+  try {
+    const response = await axios.delete(`${customerUrl}/carts/${cartId}`);
+    return response.data;
+  } catch (error) {
+    console.error('刪除購物車商品失敗:', error.message);
+    throw error;
+  }
 }
 
 /**
@@ -59,6 +107,13 @@ async function deleteCartItem(cartId) {
  */
 async function clearCart() {
   // 請實作此函式
+  try {
+    const response = await axios.delete(`${customerUrl}/carts`);
+    return response.data;
+  } catch (error) {
+    console.error('清空購物車失敗:', error.message);
+    throw error;
+  }
 }
 
 /**
@@ -68,6 +123,15 @@ async function clearCart() {
  */
 async function createOrder(userInfo) {
   // 請實作此函式
+  try {
+    const response = await axios.post(`${customerUrl}/orders`, {
+      data: { user: userInfo }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('建立訂單失敗:', error.message);
+    throw error;
+  }
 }
 
 // ========== 管理員 API ==========
@@ -80,12 +144,24 @@ async function createOrder(userInfo) {
     }
  */
 
+// 設定管理員請求的標頭
+const adminHeaders = {
+  headers: { authorization: ADMIN_TOKEN }
+};
+
 /**
  * 取得訂單列表
  * @returns {Promise<Array>}
  */
 async function fetchOrders() {
   // 請實作此函式
+  try {
+    const response = await axios.get(`${adminUrl}/orders`, adminHeaders);
+    return response.data.orders;
+  } catch (error) {
+    console.error('取得訂單列表失敗:', error.message);
+    throw error;
+  }
 }
 
 /**
@@ -96,6 +172,15 @@ async function fetchOrders() {
  */
 async function updateOrderStatus(orderId, isPaid) {
   // 請實作此函式
+  try {
+    const response = await axios.put(`${adminUrl}/orders`, {
+      data: { id: orderId, paid: isPaid }
+    }, adminHeaders);
+    return response.data;
+  } catch (error) {
+    console.error('更新訂單狀態失敗:', error.message);
+    throw error;
+  }
 }
 
 /**
@@ -105,6 +190,13 @@ async function updateOrderStatus(orderId, isPaid) {
  */
 async function deleteOrder(orderId) {
   // 請實作此函式
+  try {
+    const response = await axios.delete(`${adminUrl}/orders/${orderId}`, adminHeaders);
+    return response.data;
+  } catch (error) {
+    console.error('刪除訂單失敗:', error.message);
+    throw error;
+  }
 }
 
 module.exports = {

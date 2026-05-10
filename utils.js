@@ -11,6 +11,10 @@ const dayjs = require('dayjs');
  */
 function getDiscountRate(product) {
   // 請實作此函式
+  if (!product.price || !product.origin_price) return '';
+  const rate = (product.price / product.origin_price) * 10;
+  // 若為整數（如 8）顯示 8折，若為小數（如 8.5）顯示 85折
+  return Number.isInteger(rate) ? `${rate}折` : `${rate * 10}折`;
 }
 
 /**
@@ -20,6 +24,9 @@ function getDiscountRate(product) {
  */
 function getAllCategories(products) {
   // 請實作此函式
+  // 透過 map 取出所有 category，再利用 Set 特性去除重複值
+  const categories = products.map(product => product.category);
+  return [...new Set(categories)];
 }
 
 /**
@@ -30,6 +37,7 @@ function getAllCategories(products) {
 function formatDate(timestamp) {
   // 請實作此函式
   // 提示：dayjs.unix...
+  return dayjs.unix(timestamp).format('YYYY/MM/DD HH:mm');
 }
 
 /**
@@ -43,6 +51,12 @@ function getDaysAgo(timestamp) {
   // 1. 用 dayjs() 取得今天
   // 2. 用 dayjs.unix(timestamp) 取得日期
   // 3. 用 .diff() 計算天數差異
+  const today = dayjs();
+  const targetDate = dayjs.unix(timestamp);
+  const diffDays = today.diff(targetDate, 'day');
+
+  if (diffDays === 0) return '今天';
+  return `${diffDays} 天前`;
 }
 
 /**
@@ -59,6 +73,32 @@ function getDaysAgo(timestamp) {
  */
 function validateOrderUser(data) {
   // 請實作此函式
+  const errors = [];
+
+  if (!data.name || data.name.trim() === '') {
+    errors.push('姓名不可為空');
+  }
+
+  // 驗證 09 開頭且總共 10 碼數字
+  const telRegex = /^09\d{8}$/;
+  if (!data.tel || !telRegex.test(data.tel)) {
+    errors.push('電話必須是 09 開頭的 10 位數字');
+  }
+
+  if (!data.email || !data.email.includes('@')) {
+    errors.push('Email 必須包含 @ 符號');
+  }
+
+  if (!data.address || data.address.trim() === '') {
+    errors.push('地址不可為空');
+  }
+
+  const validPayments = ['ATM', 'Credit Card', 'Apple Pay'];
+  if (!data.payment || !validPayments.includes(data.payment)) {
+    errors.push('付款方式必須是 ATM, Credit Card 或 Apple Pay');
+  }
+
+  return { isValid: errors.length === 0, errors };
 }
 
 /**
@@ -73,6 +113,16 @@ function validateOrderUser(data) {
  */
 function validateCartQuantity(quantity) {
   // 請實作此函式
+  if (!Number.isInteger(quantity)) {
+    return { isValid: false, error: '數量必須是整數' };
+  }
+  if (quantity < 1) {
+    return { isValid: false, error: '數量不可小於 1' };
+  }
+  if (quantity > 99) {
+    return { isValid: false, error: '數量不可大於 99' };
+  }
+  return { isValid: true };
 }
 
 /**
@@ -92,6 +142,8 @@ function validateCartQuantity(quantity) {
  */
 function formatCurrency(amount) {
   // 請實作此函式
+  // 使用 toLocaleString 自動加上千分位逗號
+  return `NT$ ${amount.toLocaleString('zh-TW')}`;
 }
 
 module.exports = {
