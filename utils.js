@@ -12,9 +12,9 @@ const dayjs = require('dayjs');
 function getDiscountRate(product) {
   // 請實作此函式
   if (!product.price || !product.origin_price) return '';
-  const rate = (product.price / product.origin_price) * 10;
-  // 若為整數（如 8）顯示 8折，若為小數（如 8.5）顯示 85折
-  return Number.isInteger(rate) ? `${rate}折` : `${rate * 10}折`;
+  // 計算折數並四捨五入 (例如 7.4 -> 7)
+  const rate = Math.round((product.price / product.origin_price) * 10);
+  return `${rate}折`;
 }
 
 /**

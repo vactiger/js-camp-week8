@@ -105,12 +105,20 @@ async function getCartTotal() {
   // 提示：呼叫 fetchCart() 取得購物車資料
   // 回傳格式：{ total: 原始金額, finalTotal: 折扣後金額, itemCount: 商品筆數 }
   const cartData = await fetchCart();
+  // 防呆：確保 carts 存在，若不存在則給予空陣列
+  const carts = cartData.carts || [];
   // 透過 reduce 累加購物車內的商品總件數
-  const itemCount = cartData.carts.reduce((acc, item) => acc + item.quantity, 0);
+  // const itemCount = cartData.carts.reduce((acc, item) => acc + item.quantity, 0);
+  // 計算總件數，並確保 item.quantity 被安全地轉換為數字
+  const itemCount = carts.reduce((acc, item) => {
+    // 即使 quantity 是 undefined 或字串，也能安全轉換，無法轉換就當作 0
+    const qty = parseInt(item.quantity, 10) || 0;
+    return acc + qty;
+  }, 0);
 
   return {
-    total: cartData.total,
-    finalTotal: cartData.finalTotal,
+    total: cartData.total || 0,
+    finalTotal: cartData.finalTotal || 0,
     itemCount
   };
 }
